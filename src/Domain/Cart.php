@@ -4,13 +4,15 @@ declare(strict_types = 1);
 
 namespace Raketa\BackendTestTask\Domain;
 
-final class Cart
+use Raketa\BackendTestTask\Entity\Customer;
+
+class Cart
 {
     public function __construct(
         readonly private string $uuid,
         readonly private Customer $customer,
         readonly private string $paymentMethod,
-        private array $items,
+        private $items = []
     ) {
     }
 

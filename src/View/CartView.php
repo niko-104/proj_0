@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Raketa\BackendTestTask\View;
 
+use Exception;
 use Raketa\BackendTestTask\Domain\Cart;
 use Raketa\BackendTestTask\Repository\ProductRepository;
 
@@ -14,6 +15,9 @@ readonly class CartView
     ) {
     }
 
+    /**
+     * @throws Exception
+     */
     public function toArray(Cart $cart): array
     {
         $data = [
@@ -34,7 +38,12 @@ readonly class CartView
         $data['items'] = [];
         foreach ($cart->getItems() as $item) {
             $total += $item->getPrice() * $item->getQuantity();
-            $product = $this->productRepository->getByUuid($item->getProductUuid());
+
+            try {
+                $product = $this->productRepository->getByUuid($item->getProductUuid());
+            } catch (Exception $e) {
+                throw new Exception($e->getMessage());
+            }
 
             $data['items'][] = [
                 'uuid' => $item->getUuid(),

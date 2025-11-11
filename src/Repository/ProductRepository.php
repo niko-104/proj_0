@@ -5,41 +5,68 @@ declare(strict_types = 1);
 namespace Raketa\BackendTestTask\Repository;
 
 use Doctrine\DBAL\Connection;
-use Raketa\BackendTestTask\Repository\Entity\Product;
+use Exception;
+use Psr\Log\LoggerInterface;
+use Raketa\BackendTestTask\Entity\Product;
 
 class ProductRepository
 {
     private Connection $connection;
+    private LoggerInterface $logger;
 
-    public function __construct(Connection $connection)
+    public function __construct(Connection $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
+        $this->logger = $logger;
     }
 
+    /**
+     * @throws Exception
+     */
     public function getByUuid(string $uuid): Product
     {
-        $row = $this->connection->fetchOne(
-            "SELECT * FROM products WHERE uuid = " . $uuid,
-        );
+        $sql = "SELECT * FROM products 
+                WHERE uuid = :uuid";
 
-        if (empty($row)) {
-            throw new Exception('Product not found');
+        try {
+            $row = $this
+                ->connection
+                ->executeQuery($sql, ['uuid' => $uuid])
+                ->fetchOne();
+        } catch (Exception $e) {
+            throw new Exception("Fetch product by uuid failed: " . $e->getMessage());
         }
 
-        return $this->make($row);
+        return $this->makeProduct($row);
     }
 
+    /**
+     * @throws Exception
+     */
     public function getByCategory(string $category): array
     {
+        $sql = "SELECT * FROM products 
+                INNER JOIN categories 
+                ON categories.id = products.category_id 
+                WHERE categories.name = :category";
+
+        try {
+            $rows = $this
+                ->connection
+                ->executeQuery($sql, ['category' => $category])
+                ->fetchAllAssociative();
+        } catch (Exception $e) {
+            throw new Exception("Fetch products by category failed: " . $e->getMessage());
+        }
+
         return array_map(
-            static fn (array $row): Product => $this->make($row),
-            $this->connection->fetchAllAssociative(
-                "SELECT id FROM products WHERE is_active = 1 AND category = " . $category,
-            )
+            static fn (array $row): Product => $this->makeProduct($row),
+            $rows
         );
+
     }
 
-    public function make(array $row): Product
+    public function makeProduct(array $row): Product
     {
         return new Product(
             $row['id'],
