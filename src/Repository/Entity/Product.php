@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Raketa\BackendTestTask\Entity;
+namespace Raketa\BackendTestTask\Repository\Entity;
 
 readonly class Product
 {

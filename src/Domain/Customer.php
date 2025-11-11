@@ -2,16 +2,16 @@
 
 declare(strict_types = 1);
 
-namespace Raketa\BackendTestTask\Entity;
+namespace Raketa\BackendTestTask\Domain;
 
-readonly class Customer
+final readonly class Customer
 {
     public function __construct(
-        public int    $id,
-        public string $firstName,
-        public string $lastName,
-        public string $middleName,
-        public string $email
+        private int $id,
+        private string $firstName,
+        private string $lastName,
+        private string $middleName,
+        private string $email,
     ) {
     }
 

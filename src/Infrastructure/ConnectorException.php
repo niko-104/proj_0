@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Raketa\BackendTestTask\Exceptions;
+namespace Raketa\BackendTestTask\Infrastructure;
 
-readonly class RedisConnectorException implements \Throwable
+class ConnectorException implements \Throwable
 {
     public function __construct(
         private string $message,
